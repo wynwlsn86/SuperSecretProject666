@@ -1,0 +1,19 @@
+{
+  "name": "super-secret-project",
+  "version": "1.0.0",
+  "description": "Shhhhhhhhhhhhhhhhhhh!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wynwlsn86/SuperSecretProject666.git"
+  },
+  "author": "Wayne Wilson, Rachel Gonzalez, Andre Pato",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wynwlsn86/SuperSecretProject666/issues"
+  },
+  "homepage": "https://github.com/wynwlsn86/SuperSecretProject666#readme"
+}
