@@ -5,6 +5,7 @@
 const config = {
 	bucketName: '',
 	region: '',
+	dirName: '',
 	accessKeyId: '',
 	secretAccessKey: ''
 }
