@@ -4,6 +4,7 @@ const logger = require('morgan')
 const cors = require('cors')
 const passport = require('passport')
 const authRouter = require('./routes/authRouter')
+const userRouter = require('./routes/userRouter')
 const auth = require('./auth/auth')
 const dotenv = require('dotenv')
 dotenv.config()
@@ -19,7 +20,7 @@ app.use(logger('dev'))
 
 // Routing
 app.use('/auth', auth, authRouter)
-
+app.use('/users', userRouter)
 // Initializing passport Auth
 app.use(passport.initialize())
 

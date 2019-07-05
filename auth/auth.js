@@ -1,6 +1,6 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
-const { User } = require('../db/models')
+const { User } = require('../database/models')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const JWTStrategy = require('passport-jwt').Strategy
@@ -14,19 +14,25 @@ const signToken = (payload) => jwt.sign(payload, SECRET)
 // creating user signup
 passport.use(
 	'signup',
+
 	new LocalStrategy(
 		{
 			passReqToCallback: true,
 			usernameField: 'username',
 			passwordField: 'password'
 		},
+		// Passport requires two authentication fields
+		// using username and password
+		// reqToCallback allows more fields to be passed to create the user
 		async (req, username, password, done) => {
 			try {
 				const user = await User.create({
-					name: req.body.name,
+					username: username,
+					password: password,
 					email: req.body.email,
-					username,
-					password
+					firstName: req.body.firstName,
+					lastName: req.body.lastName,
+					skills: req.body.skills
 				})
 				if (!user) {
 					return done(null, false, { msg: 'Unable to create user' })
