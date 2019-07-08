@@ -10,6 +10,14 @@
     "type": "git",
     "url": "git+https://github.com/wynwlsn86/SuperSecretProject666.git"
   },
+  "scripts": {
+      "start": "node server.js",
+      "dev": "nodemon server.js",
+      "heroku-postbuild": "npm run build",
+      "seed": "node ./db/seed.js",
+      "reset": "node ./db/reset.js",
+      "create:Db": "dropdb --if-exists -e hackstagram && createdb -e hackstagram"
+  },
   "author": "Wayne Wilson, Rachel Gonzalez, Andre Pato",
   "license": "MIT",
   "bugs": {
