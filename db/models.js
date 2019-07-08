@@ -1,6 +1,5 @@
 const { Sequelize } = require('sequelize')
 const bcrypt = require('bcrypt')
-
 const db = new Sequelize(
 	process.env.DATABASE_URL || 'postgres://localhost:5432/hackstagram',
 	{
@@ -11,9 +10,12 @@ const db = new Sequelize(
 		}
 	}
 )
-
 const User = db.define('user', {
-	name: {
+	firstName: {
+		type: Sequelize.STRING,
+		allowNull: false
+	},
+	lastName: {
 		type: Sequelize.STRING,
 		allowNull: false
 	},
@@ -39,15 +41,14 @@ const User = db.define('user', {
 	},
 	skills: {
 		type: Sequelize.ARRAY(Sequelize.STRING)
-	},
-	followers: {
-		type: Sequelize.ARRAY(Sequelize.INTEGER)
 	}
 })
 
-User.beforeCreate(async (user, options) => {
-	const hashedPassword = await bcrypt.hash(user.password, 12)
-	user.password = hashedPassword
+const Follower = db.define('follower', {
+	follower_id: {
+		primaryKey: true,
+		type: Sequelize.INTEGER
+	}
 })
 
 const Post = db.define('post', {
@@ -80,11 +81,22 @@ const CommentLike = db.define('commentLike', {
 	}
 })
 
+User.beforeCreate(async (user, options) => {
+	const hashedPassword = await bcrypt.hash(user.password, 12)
+	user.password = hashedPassword
+})
+
+Follower.belongsTo(User, {
+	as: 'user',
+	through: 'follower',
+	foreignKey: 'follower_id'
+})
+
 User.hasMany(Post, { onDelete: 'cascade' })
 User.hasMany(PostLike, { onDelete: 'cascade' })
 User.hasMany(Comment, { onDelete: 'cascade' })
 User.hasMany(CommentLike, { onDelete: 'cascade' })
-
+User.hasMany(Follower, { as: 'followers' })
 Post.belongsTo(User)
 Post.hasMany(Comment)
 Post.hasMany(PostLike)
@@ -105,5 +117,6 @@ module.exports = {
 	CommentLike,
 	Post,
 	PostLike,
+	Follower,
 	db
 }

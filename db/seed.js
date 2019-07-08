@@ -16,29 +16,29 @@ const main = async () => {
 
 	// Seed Data
 	const user = await User.create({
-		name: 'Tester 1',
+		firstName: 'John',
+		lastName: 'Smith',
 		username: 'tester',
 		email: 'tester@mail.com',
 		password: '1234',
-		skills: ['React', 'Python', 'Mongo'],
-		followers: []
+		skills: ['React', 'Python', 'Mongo']
 	})
 
 	const user1 = await User.create({
-		name: 'tester2',
+		firstName: 'Jane',
+		lastName: 'Doe',
 		username: 'test',
 		email: 'test@mail.com',
 		password: '1234',
-		skills: ['HTML', 'Css', 'React'],
-		followers: []
+		skills: ['HTML', 'Css', 'React']
 	})
 	const user2 = await User.create({
-		name: 'tester3',
+		firstName: 'Jackie',
+		lastName: 'Legs',
 		username: 'test3',
 		email: 'test3@mail.com',
 		password: '1234',
-		skills: ['HTML', 'Css'],
-		followers: []
+		skills: ['HTML', 'Css']
 	})
 
 	const post = await Post.create({

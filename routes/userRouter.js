@@ -1,7 +1,7 @@
 const express = require('express')
 const userRouter = express.Router()
 const bcrypt = require('bcrypt')
-const { User } = require('../db/models')
+const { User, Follower } = require('../database/models')
 
 userRouter.get('/', async (req, res) => {
 	try {
@@ -14,32 +14,84 @@ userRouter.get('/', async (req, res) => {
 
 userRouter.get('/:id', async (req, res) => {
 	try {
-		const users = await User.findByPk(req.params.id)
+		const users = await User.findByPk(req.params.id, {
+			include: [Follower]
+		})
 		res.send(users)
 	} catch (error) {}
 })
 
-userRouter.get('/:id/posts', async (req, res) => {
+userRouter.get('/verify/username', async (req, res, next) => {
 	try {
-		const userPosts = await User.findAll({
-			include: [{ model: Post }],
-			include: [Bookmark],
-			where: { id: req.params.id }
-		})
-		res.send(userPosts)
+		const users = await User.findAll()
+		const usernames = []
+		if (users) {
+			for (let i = 0; i < users.length; i++) {
+				usernames.push(users[i].username.toLowerCase())
+			}
+		}
+		res.send(usernames)
 	} catch (error) {
 		throw error
 	}
 })
 
-userRouter.get('/users/name/:username', async (req, res) => {
+userRouter.get('/verify/email', async (req, res, next) => {
 	try {
-		const users = await User.findAll({
-			where: {
-				username: req.params.username
+		const users = await User.findAll()
+		const emails = []
+		if (users) {
+			for (let i = 0; i < users.length; i++) {
+				emails.push(users[i].email.toLowerCase())
 			}
+		}
+		res.send(emails)
+	} catch (error) {
+		throw error
+	}
+})
+
+userRouter.get('/:user_id/followers', async (req, res) => {
+	try {
+		const user = await User.findOne({
+			where: {
+				id: req.params.user_id
+			},
+			include: [
+				{
+					model: Follower,
+					as: 'followers',
+					include: [
+						{
+							model: User,
+							as: 'user'
+						}
+					]
+				}
+			]
 		})
-		res.send(users)
+		res.send(user)
+	} catch (error) {
+		throw error
+	}
+})
+
+userRouter.post('/:user_id/follow/:follower_id', async (req, res) => {
+	try {
+		const user = await User.findByPk(req.params.user_id)
+		if (user) {
+			if (user.id.toString() === req.params.follower_id) {
+				res.status(400).json({ err: 'You cannot follow yourself' })
+			} else {
+				const following = await Follower.findOrCreate({
+					where: {
+						userId: req.params.user_id,
+						follower_id: req.params.follower_id
+					}
+				})
+				res.send(following)
+			}
+		}
 	} catch (error) {
 		throw error
 	}
@@ -56,7 +108,6 @@ userRouter.get('/skills', async (req, res) => {
 				}
 			}
 		}
-		console.log(userArr)
 		res.send(userArr)
 	} catch (error) {
 		throw error
