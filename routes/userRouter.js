@@ -11,15 +11,31 @@ userRouter.get('/', async (req, res) => {
 		throw error
 	}
 })
-
+// consolidated user posts and followers into one route
 userRouter.get('/:id', async (req, res) => {
 	try {
 		const users = await User.findByPk(req.params.id, {
-			include: [Follower]
+			include: [
+				{
+					model: Post
+				},
+				{
+					model: Follower,
+					as: 'followers',
+					include: [
+						{
+							model: User,
+							as: 'user'
+						}
+					]
+				}
+			]
 		})
 		res.send(users)
 	} catch (error) {}
 })
+
+// verify username is not taken already for signup
 
 userRouter.get('/verify/username', async (req, res, next) => {
 	try {
@@ -36,6 +52,7 @@ userRouter.get('/verify/username', async (req, res, next) => {
 	}
 })
 
+// verify email is not taken when signing up
 userRouter.get('/verify/email', async (req, res, next) => {
 	try {
 		const users = await User.findAll()
@@ -51,31 +68,8 @@ userRouter.get('/verify/email', async (req, res, next) => {
 	}
 })
 
-userRouter.get('/:user_id/followers', async (req, res) => {
-	try {
-		const user = await User.findOne({
-			where: {
-				id: req.params.user_id
-			},
-			include: [
-				{
-					model: Follower,
-					as: 'followers',
-					include: [
-						{
-							model: User,
-							as: 'user'
-						}
-					]
-				}
-			]
-		})
-		res.send(user)
-	} catch (error) {
-		throw error
-	}
-})
-
+// follow a user, takes current logged in user as user_id and user that is getting followed
+// as follower_id, findorcreate checks if record is found, if not then record is created.
 userRouter.post('/:user_id/follow/:follower_id', async (req, res) => {
 	try {
 		const user = await User.findByPk(req.params.user_id)
@@ -97,14 +91,21 @@ userRouter.post('/:user_id/follow/:follower_id', async (req, res) => {
 	}
 })
 
-userRouter.get('/skills', async (req, res) => {
+// Does this route make sense as a search route, take in a skill
+userRouter.get('/search/skills', async (req, res) => {
 	try {
 		const findUser = await User.findAll()
 		let userArr = []
 		if (findUser) {
 			for (let i = 0; i < findUser.length; i++) {
-				if (findUser[i].skills.includes(req.body.skills)) {
-					arr.push(findUser[i])
+				for (let j = 0; j < findUser[i].skills.length; j++) {
+					if (
+						findUser[i].skills[j]
+							.toLowerCase()
+							.includes(req.body.skills.toLowerCase())
+					) {
+						userArr.push(findUser[i])
+					}
 				}
 			}
 		}
@@ -113,7 +114,7 @@ userRouter.get('/skills', async (req, res) => {
 		throw error
 	}
 })
-
+// returns suggest users to follow based on common skills
 userRouter.get('/:id/suggested', async (req, res) => {
 	try {
 		const findUser = await User.findByPk(req.params.id)
@@ -140,8 +141,8 @@ userRouter.get('/:id/suggested', async (req, res) => {
 		throw error
 	}
 })
-
-userRouter.put('/update/:id', async (req, res) => {
+// update user credentials and password
+userRouter.put('/:id/update', async (req, res) => {
 	try {
 		const user = await User.findByPk(req.params.id)
 		await User.beforeUpdate(bcrypt.hash(req.body.password, 12))
