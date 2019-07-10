@@ -1,7 +1,7 @@
 const express = require('express')
 const userRouter = express.Router()
 const bcrypt = require('bcrypt')
-const { User, Follower } = require('../database/models')
+const { User, Follower, Post } = require('../db/models')
 
 userRouter.get('/', async (req, res) => {
 	try {
@@ -15,61 +15,27 @@ userRouter.get('/', async (req, res) => {
 userRouter.get('/:id', async (req, res) => {
 	try {
 		const users = await User.findByPk(req.params.id, {
-			include: [
-				{
-					model: Post
-				},
-				{
-					model: Follower,
-					as: 'followers',
-					include: [
-						{
-							model: User,
-							as: 'user'
-						}
-					]
-				}
-			]
+			include: [Post]
 		})
 		res.send(users)
-	} catch (error) {}
-})
-
-// verify username is not taken already for signup
-
-userRouter.get('/verify/username', async (req, res, next) => {
-	try {
-		const users = await User.findAll()
-		const usernames = []
-		if (users) {
-			for (let i = 0; i < users.length; i++) {
-				usernames.push(users[i].username.toLowerCase())
-			}
-		}
-		res.send(usernames)
 	} catch (error) {
 		throw error
 	}
 })
 
-// verify email is not taken when signing up
-userRouter.get('/verify/email', async (req, res, next) => {
+userRouter.get('/:user_id/followers', async (req, res) => {
 	try {
-		const users = await User.findAll()
-		const emails = []
-		if (users) {
-			for (let i = 0; i < users.length; i++) {
-				emails.push(users[i].email.toLowerCase())
+		const user = await Follower.findAll({
+			where: {
+				follower_id: req.params.user_id
 			}
-		}
-		res.send(emails)
+		})
+		res.send(user)
 	} catch (error) {
 		throw error
 	}
 })
 
-// follow a user, takes current logged in user as user_id and user that is getting followed
-// as follower_id, findorcreate checks if record is found, if not then record is created.
 userRouter.post('/:user_id/follow/:follower_id', async (req, res) => {
 	try {
 		const user = await User.findByPk(req.params.user_id)
@@ -90,7 +56,6 @@ userRouter.post('/:user_id/follow/:follower_id', async (req, res) => {
 		throw error
 	}
 })
-
 // Does this route make sense as a search route, take in a skill
 userRouter.get('/search/skills', async (req, res) => {
 	try {
