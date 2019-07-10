@@ -43,7 +43,7 @@ const User = db.define('user', {
 		type: Sequelize.ARRAY(Sequelize.STRING)
 	}
 })
-
+// Follower Table
 const Follower = db.define('follower', {
 	follower_id: {
 		primaryKey: true,
@@ -86,6 +86,7 @@ User.beforeCreate(async (user, options) => {
 	user.password = hashedPassword
 })
 
+// Setting follower table as through table by using foreign key
 Follower.belongsTo(User, {
 	as: 'user',
 	through: 'follower',
